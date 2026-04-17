@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply serif font to headings globally */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Playfair Display", serif;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  
+  h4 {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  
+  h5 {
+    font-size: 1.125rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  
+  h6 {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+section {
+  scroll-margin-top: 100px;
+}
+
+/* Utility classes for serif typography */
+@layer components {
+  .hero-title {
+    font-family: "Playfair Display", serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    font-weight: 700;
+  }
+  
+  .section-title {
+    font-family: "Playfair Display", serif;
+    font-size: 2.5rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  .card-title {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+}
