@@ -2,7 +2,7 @@
 "name": "frontend",
 "private": true,
 "version": "0.0.0",
-"homepage": "https://gorakhdongaretrovira.github.io/Nithiya-Ayurveda",
+"homepage": "https://www.nithyaayurveda.com",
 "type": "module",
 "scripts": {
 "dev": "vite",
