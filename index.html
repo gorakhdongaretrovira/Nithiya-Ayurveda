@@ -2,13 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" id="dynamic-favicon" type="image/png" href="/assets/logo-BC5qaa_O.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <title>frontend</title>
-    <script type="module" crossorigin src="/assets/index-DGZgoYXf.js"></script>
+    <title>Nithya Ayurveda</title>
+    <script>
+      (function () {
+        var img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          var size = 64;
+          var canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          var ctx = canvas.getContext("2d");
+
+          // Draw circular clip
+          ctx.beginPath();
+          ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+
+          // Draw the logo inside the circle
+          ctx.drawImage(img, 0, 0, size, size);
+
+          // Replace favicon
+          var link = document.getElementById("dynamic-favicon");
+          link.href = canvas.toDataURL("image/png");
+        };
+        img.src = "/src/assets/logo/logo.png";
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-PTnsrxi_.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BM6wszoM.css">
   </head>
   <body>
