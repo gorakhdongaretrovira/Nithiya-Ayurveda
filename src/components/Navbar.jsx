@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo/logo.png";
+import products from "../data/products";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
@@ -22,51 +23,10 @@ const styles = `
     --glass-border:  rgba(201,168,76,0.18);
   }
 
-  /* ── TOP STRIP ── */
-  .na-top-strip {
-    width: 100%;
-    background: linear-gradient(90deg, var(--deep-green) 0%, var(--nav-green2) 50%, var(--deep-green) 100%);
-    border-bottom: 1px solid rgba(201,168,76,0.14);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    padding: 8px 40px;
-    position: fixed;
-    top: 0; left: 0;
-    z-index: 1001;
-    transition: transform 0.4s ease;
-    overflow: hidden;
-  }
-  .na-top-strip::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 30%, rgba(232,201,106,0.8) 50%, rgba(201,168,76,0.5) 70%, transparent);
-  }
-  .na-top-strip.na-hidden { transform: translateY(-100%); }
-
-  .na-strip-text {
-    font-family: 'Jost', sans-serif;
-    font-size: 9px;
-    font-weight: 400;
-    letter-spacing: 3.5px;
-    text-transform: uppercase;
-    color: rgba(201,168,76,0.7);
-    white-space: nowrap;
-  }
-  .na-strip-dot {
-    width: 3px; height: 3px;
-    border-radius: 50%;
-    background: rgba(201,168,76,0.35);
-    flex-shrink: 0;
-  }
-
   /* ── NAVBAR ── */
   .na-navbar {
     position: fixed;
-    top: 28px; left: 0;
+    top: 0; left: 0;
     width: 100%;
     z-index: 1000;
     background: var(--nav-green);
@@ -74,9 +34,8 @@ const styles = `
     box-shadow:
       0 4px 32px rgba(0,0,0,0.28),
       0 1px 0 rgba(201,168,76,0.1) inset;
-    transition: top 0.4s ease, background 0.35s ease, box-shadow 0.35s ease;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
   }
-  .na-navbar.na-strip-hidden { top: 0; }
   .na-navbar.na-scrolled {
     background: rgba(7, 20, 12, 0.98);
     box-shadow:
@@ -409,13 +368,11 @@ const styles = `
     pointer-events: all;
   }
 
-  /* Spacer pushes content below the fixed navbar */
   .na-mobile-menu-spacer {
     height: 60px;
     flex-shrink: 0;
   }
 
-  /* Gold top line accent */
   .na-mobile-menu-top-accent {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(201,168,76,0.6) 30%, rgba(232,201,106,0.9) 50%, rgba(201,168,76,0.6) 70%, transparent);
@@ -522,6 +479,77 @@ const styles = `
     background: rgba(201,168,76,0.1);
   }
 
+  /* ── SEARCH ── */
+  .na-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .na-search-input {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: var(--text-nav);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    padding: 6px 14px;
+    width: 180px;
+    outline: none;
+    transition: border-color 0.25s, background 0.25s, width 0.3s ease;
+  }
+  .na-search-input::placeholder {
+    color: rgba(232,223,200,0.35);
+  }
+  .na-search-input:focus {
+    border-color: rgba(201,168,76,0.55);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .na-search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 240px;
+    background: rgba(7, 20, 12, 0.98);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+    z-index: 1001;
+    overflow: hidden;
+  }
+
+  .na-search-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(201,168,76,0.07);
+    transition: background 0.2s ease;
+  }
+  .na-search-item:last-child { border-bottom: none; }
+  .na-search-item:hover { background: rgba(201,168,76,0.08); }
+
+  .na-search-item-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: var(--text-nav);
+    transition: color 0.2s;
+  }
+  .na-search-item:hover .na-search-item-name { color: var(--gold-light); }
+
+  .na-search-no-result {
+    padding: 12px 16px;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    color: rgba(232,223,200,0.35);
+    letter-spacing: 0.5px;
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 980px) {
   .na-nav-center { display: none; }
@@ -536,13 +564,10 @@ const styles = `
   .na-logo-group { gap: 10px; }
   .na-logo-name { font-size: 16px; }
   .na-logo-tagline { font-size: 7.5px; letter-spacing: 2px; }
-  .na-top-strip { display: none; }
-  .na-navbar { top: 0 !important; }
   .na-icon-btn { width: 36px; height: 36px; }
   .na-icon-btn svg { width: 15px; height: 15px; }
   .na-cart-badge { top: 3px; right: 3px; width: 13px; height: 13px; font-size: 7px; }
 
-  /* ✅ ADD THESE LINES HERE (VERY IMPORTANT) */
   .na-navbar-inner {
     display: flex !important;
     justify-content: space-between;
@@ -556,6 +581,9 @@ const styles = `
   .na-logo-group {
     margin-left: 8px;
   }
+
+  .na-search-input { width: 130px; font-size: 10px; }
+  .na-search-dropdown { width: 210px; }
 }
 
   @media (max-width: 480px) {
@@ -565,6 +593,8 @@ const styles = `
     .na-logo-img { width: 34px; height: 34px; }
     .na-logo-img-wrap { width: 34px; height: 34px; }
     .na-mobile-menu-spacer { height: 56px; }
+    .na-search-input { width: 110px; }
+    .na-search-dropdown { width: 190px; }
   }
 `;
 
@@ -573,9 +603,11 @@ const NAV_LINKS = ["Home", "About", "Products", "Team", "Contact"];
 export default function Navbar({ cartCount = 0, setIsCartOpen }) {
   const [scrolled,    setScrolled]    = useState(false);
   const [menuOpen,    setMenuOpen]    = useState(false);
-  const [stripHidden, setStripHidden] = useState(false);
+  const [searchOpen,  setSearchOpen]  = useState(false);
+  const [query,       setQuery]       = useState("");
+  const [results,     setResults]     = useState([]);
   const styleInjected = useRef(false);
-  const lastScrollY   = useRef(0);
+  const searchRef     = useRef(null);
 
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -598,8 +630,6 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 50);
-      setStripHidden(y > 30);
-      lastScrollY.current = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -610,23 +640,63 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  const navbarHeight = typeof window !== "undefined" && window.innerWidth <= 480
-    ? 56
-    : typeof window !== "undefined" && window.innerWidth <= 980
-    ? 60
-    : 102;
+  // Filter products when query changes
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    const q = query.trim().toLowerCase();
+    const matched = products
+      .filter(p => p.name.toLowerCase().includes(q))
+      .slice(0, 5);
+    setResults(matched);
+  }, [query]);
+
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+        setQuery("");
+        setResults([]);
+      }
+    };
+    if (searchOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchOpen]);
+
+  const handleSearchToggle = () => {
+    setSearchOpen(prev => {
+      if (prev) {
+        setQuery("");
+        setResults([]);
+      }
+      return !prev;
+    });
+  };
+
+  const handleProductSelect = (productId) => {
+    setSearchOpen(false);
+    setQuery("");
+    setResults([]);
+    if (location.pathname !== "/products") {
+      navigate("/products");
+      // Wait for navigation + render, then scroll
+      setTimeout(() => {
+        const el = document.getElementById(`product-${productId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 400);
+    } else {
+      const el = document.getElementById(`product-${productId}`);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <>
-      {/* ── Top announcement strip ── */}
-      <div className={`na-top-strip${stripHidden ? " na-hidden" : ""}`}>
-        <span className="na-strip-text">Free delivery on orders above ₹999</span>
-        <span className="na-strip-dot" />
-        <span className="na-strip-text">100% Natural · Clinically Validated</span>
-        <span className="na-strip-dot" />
-        <span className="na-strip-text">Est. Since 2001 · Kerala Heritage</span>
-      </div>
-
       {/* ── Mobile compact slide-down menu ── */}
       <div className={`na-mobile-menu${menuOpen ? " na-open" : ""}`}>
         <div className="na-mobile-menu-spacer" />
@@ -666,7 +736,7 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
       </div>
 
       {/* ── Main navbar ── */}
-      <nav className={`na-navbar${scrolled ? " na-scrolled" : ""}${stripHidden ? " na-strip-hidden" : ""}`}>
+      <nav className={`na-navbar${scrolled ? " na-scrolled" : ""}`}>
         <div className="na-navbar-inner">
 
           {/* LOGO */}
@@ -705,12 +775,51 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
 
           {/* Actions */}
           <div className="na-nav-actions">
-            <button className="na-icon-btn" aria-label="Search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20.5 20.5l-3.8-3.8" />
-              </svg>
-            </button>
+
+            {/* Search */}
+            <div className="na-search-wrap" ref={searchRef}>
+              <button
+                type="button"
+                className="na-icon-btn"
+                aria-label="Search"
+                onClick={handleSearchToggle}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="16.5" y1="16.5" x2="22" y2="22" />
+                </svg>
+              </button>
+
+              {searchOpen && (
+                <>
+                  <input
+                    autoFocus
+                    className="na-search-input"
+                    type="text"
+                    placeholder="Search products..."
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                  />
+                  {query.trim() && (
+                    <div className="na-search-dropdown">
+                      {results.length > 0 ? (
+                        results.map(p => (
+                          <div
+                            key={p.id}
+                            className="na-search-item"
+                            onClick={() => handleProductSelect(p.id)}
+                          >
+                            <span className="na-search-item-name">{p.name}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="na-search-no-result">No products found</div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
 
             <button
               type="button"
@@ -752,7 +861,7 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
       <div style={{ height: "60px" }} className="na-desktop-spacer" />
       <style>{`
         @media (min-width: 981px) {
-          .na-desktop-spacer { height: 102px !important; }
+          .na-desktop-spacer { height: 74px !important; }
         }
       `}</style>
     </>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import product1 from "../assets/images/product1.png";
 import product2 from "../assets/images/product2.png";
@@ -85,6 +85,7 @@ function MiniStars({ rating }) {
 
 export default function FeaturedProducts() {
   const { addToCart } = useOutletContext();
+  const [addedStates, setAddedStates] = useState({});
 
   const headRef = useRef(null);
   const cardRefs = useRef([]);
@@ -114,6 +115,11 @@ export default function FeaturedProducts() {
       category: p.category,
       quantity: 1,
     });
+
+    setAddedStates(prev => ({ ...prev, [p.id]: true }));
+    setTimeout(() => {
+      setAddedStates(prev => ({ ...prev, [p.id]: false }));
+    }, 1800);
   };
 
   return (
@@ -309,6 +315,8 @@ export default function FeaturedProducts() {
           flex-shrink: 0;
         }
         .add-to-cart:hover { background: #2d5a42; transform: translateY(-2px); }
+        .add-to-cart.added { background: #4CAF50; transform: translateY(0); cursor: default; }
+        .add-to-cart.added:hover { background: #4CAF50; transform: translateY(0); }
 
         .view-all-container {
            text-align: center;
@@ -363,8 +371,12 @@ export default function FeaturedProducts() {
                       <span className="mrp-line">₹{p.mrp}</span>
                       <div className="price-main"><span>₹</span>{discounted}</div>
                     </div>
-                    <button className="add-to-cart" onClick={() => handleAddToCart(p)}>
-                      ADD TO CART
+                    <button
+                      className={`add-to-cart${addedStates[p.id] ? " added" : ""}`}
+                      onClick={() => handleAddToCart(p)}
+                      disabled={addedStates[p.id]}
+                    >
+                      {addedStates[p.id] ? "✓ Added" : "ADD TO CART"}
                     </button>
                   </div>
                 </div>
