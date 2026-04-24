@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo/logo.png";
 
 const styles = `
@@ -242,6 +243,7 @@ const styles = `
     letter-spacing: 0.03em; transition: all .3s;
     display: inline-flex; align-items: center; gap: 0;
     position: relative;
+    background: none; border: none; padding: 0; cursor: pointer;
   }
   .ft-link::before {
     content: '·';
@@ -398,20 +400,39 @@ const styles = `
 
 const TRUST = ["AYUSH Certified", "100% Organic", "Pure Extracts", "GMP Compliant"];
 
+// FIX 1: Use numeric IDs matching products.js
+const PRODUCTS = [
+  { name: "Hemp Pain Spray", id: 1 },
+  { name: "Ovucare",         id: 2 },
+  { name: "Vajra-X",         id: 3 },
+  { name: "Kufrida Drops",   id: 4 },
+];
+
 export default function Footer() {
-  const year = new Date().getFullYear();
+  const year        = new Date().getFullYear();
+  const navigate    = useNavigate();
+  const location    = useLocation();
+  const footerRef   = useRef(null);
+  const animRefs    = useRef([]);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const footerRef = useRef(null);
-  const animRefs = useRef([]);
+  // FIX 2: Use navigate state instead of hash — reliable across page load
+  const handleProductClick = (productId) => {
+    const elementId = `product-${productId}`;
+    if (location.pathname !== "/products") {
+      navigate("/products", { state: { scrollTo: elementId } });
+    } else {
+      const el = document.getElementById(elementId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("ft-in");
-          }
+          if (entry.isIntersecting) entry.target.classList.add("ft-in");
         });
       },
       { threshold: 0.08 }
@@ -427,12 +448,6 @@ export default function Footer() {
   return (
     <>
       <style>{styles}</style>
-      {/*
-        ft-outer-wrap uses background: #030a05 and margin-top:0
-        This eliminates the white gap on ALL pages (not just home).
-        The page background bleeds through without this wrapper
-        because some page sections have white/light backgrounds.
-      */}
       <div className="ft-outer-wrap">
         <footer className="ft-root" ref={footerRef}>
           <div className="ft-top-rule" />
@@ -477,6 +492,7 @@ export default function Footer() {
 
             {/* GRID */}
             <div className="ft-grid">
+
               {/* BRAND */}
               <div ref={addRef} className="ft-anim ft-anim-d1">
                 <div className="ft-logo-row">
@@ -535,13 +551,18 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* COLLECTIONS */}
+              {/* COLLECTIONS — FIX: numeric IDs + state-based navigation */}
               <div ref={addRef} className="ft-anim ft-anim-d3">
                 <h4 className="ft-col-label">Collections</h4>
                 <ul className="ft-link-list">
-                  {["Hemp Pain Spray", "Ovucare", "Vajra-X", "Kufrida Drops"].map(l => (
-                    <li key={l}>
-                      <a href="/products" className="ft-link">{l}</a>
+                  {PRODUCTS.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        className="ft-link"
+                        onClick={() => handleProductClick(item.id)}
+                      >
+                        {item.name}
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -606,6 +627,7 @@ export default function Footer() {
                 </svg>
               </button>
             </div>
+
           </div>
         </footer>
       </div>

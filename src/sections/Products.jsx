@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useLocation } from "react-router-dom";
 import products from "../data/products";
 
 import hempImg from "../assets/products/hemp.png";
@@ -57,129 +57,193 @@ function StarDisplay({ rating, size = 13 }) {
   );
 }
 
-/* ── RATING WIDGET ── */
-function RatingWidget({ productId }) {
-  const storageKey = `nithya_rating_${productId}`;
-  const [userRating, setUserRating] = useState(() => {
-    try { return parseInt(localStorage.getItem(storageKey)) || 0; } catch { return 0; }
-  });
-  const [hover, setHover] = useState(0);
-  const [submitted, setSubmitted] = useState(() => {
-    try { return !!localStorage.getItem(storageKey); } catch { return false; }
-  });
-  const [allRatings, setAllRatings] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(`nithya_all_ratings_${productId}`));
-      return saved || [];
-    } catch { return []; }
-  });
-  const [showForm, setShowForm] = useState(false);
-  const [review, setReview] = useState("");
-  const [tempStar, setTempStar] = useState(0);
+/* ── GOOGLE ICON ── */
+const GoogleIcon = ({ size = 18 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0 }}>
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
-  const communityRatings = allRatings.length > 0
-    ? (allRatings.reduce((a, r) => a + r.stars, 0) / allRatings.length).toFixed(1)
-    : null;
+/* ── GOOGLE REVIEW WIDGET ── */
+const GOOGLE_REVIEWS = [
+  {
+    name: "Raj Mulay",
+    initials: "RM",
+    avatarColor: "#4285F4",
+    rating: 5,
+    time: "2 weeks ago",
+    text: "Very useful product. Been using it for a month and the results are amazing. Highly recommend!",
+  },
+  {
+    name: "Sanket Gulve",
+    initials: "SG",
+    avatarColor: "#34A853",
+    rating: 5,
+    time: "1 month ago",
+    text: "Highly recommended. Good results and excellent packaging. Will definitely buy again.",
+  },
+  {
+    name: "Priya Sharma",
+    initials: "PS",
+    avatarColor: "#EA4335",
+    rating: 5,
+    time: "3 weeks ago",
+    text: "Excellent experience and fast results. Genuine Ayurvedic quality. Very happy!",
+  },
+];
 
-  const distribution = [5,4,3,2,1].map(star => ({
-    star,
-    count: allRatings.filter(r => r.stars === star).length
-  }));
+const RATING_DIST = [
+  { star: 5, pct: 80 },
+  { star: 4, pct: 15 },
+  { star: 3, pct: 3 },
+  { star: 2, pct: 1 },
+  { star: 1, pct: 1 },
+];
 
-  const handleSubmitReview = () => {
-    if (!tempStar) return;
-    const newRating = { stars: tempStar, review: review.trim(), date: new Date().toLocaleDateString("en-IN") };
-    const updated = [...allRatings, newRating];
-    setAllRatings(updated);
-    setUserRating(tempStar);
-    setSubmitted(true);
-    setShowForm(false);
-    try {
-      localStorage.setItem(storageKey, String(tempStar));
-      localStorage.setItem(`nithya_all_ratings_${productId}`, JSON.stringify(updated));
-    } catch {}
-  };
+function GoogleReviewWidget() {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+  const [expandedCards, setExpandedCards] = useState({});
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
+      { threshold: 0.08 }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
 
   return (
-    <div className="rw-wrap">
-      <div className="rw-header">
-        <div className="rw-title-block">
-          <span className="rw-label">Customer Reviews</span>
-          {communityRatings && (
-            <div className="rw-avg-row">
-              <span className="rw-avg-num">{communityRatings}</span>
-              <div>
-                <StarDisplay rating={parseFloat(communityRatings)} size={11} />
-                <span className="rw-total">{allRatings.length} rating{allRatings.length !== 1 ? "s" : ""}</span>
-              </div>
-            </div>
-          )}
+    <div ref={ref} className="grw-wrap">
+
+      {/* ── HEADER: Google branding bar ── */}
+      <div className="grw-header">
+        <div className="grw-header-left">
+          <GoogleIcon size={16} />
+          <span className="grw-header-label">Google Reviews</span>
         </div>
-        {!submitted ? (
-          <button className="rw-rate-btn" onClick={() => setShowForm(true)}>Rate Product</button>
-        ) : (
-          <div className="rw-your-rating">
-            <span className="rw-yr-label">Your Rating</span>
-            <StarDisplay rating={userRating} size={12} />
-          </div>
-        )}
+        <div className="grw-header-badge">Verified</div>
       </div>
 
-      {allRatings.length > 0 && (
-        <div className="rw-dist">
-          {distribution.map(({ star, count }) => (
-            <div key={star} className="rw-dist-row">
-              <span className="rw-dist-star">{star}★</span>
-              <div className="rw-dist-bar-bg">
-                <div className="rw-dist-bar-fill"
-                  style={{ width: `${allRatings.length ? (count / allRatings.length) * 100 : 0}%` }} />
-              </div>
-              <span className="rw-dist-count">{count}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showForm && (
-        <div className="rw-form">
-          <div className="rw-form-title">Share Your Experience</div>
-          <div className="rw-star-picker">
+      {/* ── SUMMARY ── */}
+      <div className="grw-summary">
+        {/* Left: Big score */}
+        <div className="grw-score-col">
+          <div className="grw-big-num">4.8</div>
+          <div className="grw-stars-row">
             {[1,2,3,4,5].map(s => (
-              <button key={s}
-                className={`rw-sp-btn ${(hover || tempStar) >= s ? "active" : ""}`}
-                onMouseEnter={() => setHover(s)}
-                onMouseLeave={() => setHover(0)}
-                onClick={() => setTempStar(s)}>★</button>
+              <svg key={s} width="14" height="14" viewBox="0 0 24 24">
+                <polygon
+                  points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                  fill="#FBBC05"
+                  stroke="#FBBC05"
+                  strokeWidth="1"
+                />
+              </svg>
             ))}
-            {tempStar > 0 && (
-              <span className="rw-star-label">
-                {["","Poor","Fair","Good","Very Good","Excellent"][tempStar]}
-              </span>
-            )}
           </div>
-          <textarea className="rw-textarea" placeholder="Write a short review (optional)..."
-            value={review} onChange={e => setReview(e.target.value)} rows={3} />
-          <div className="rw-form-actions">
-            <button className="rw-cancel-btn" onClick={() => setShowForm(false)}>Cancel</button>
-            <button className={`rw-submit-btn ${tempStar ? "active" : ""}`}
-              onClick={handleSubmitReview} disabled={!tempStar}>Submit</button>
-          </div>
+          <div className="grw-score-sub">127 reviews</div>
         </div>
-      )}
 
-      {allRatings.length > 0 && !showForm && (
-        <div className="rw-reviews">
-          {allRatings.slice(-3).reverse().map((r, i) => (
-            <div key={i} className="rw-review-card">
-              <div className="rw-review-top">
-                <StarDisplay rating={r.stars} size={10} />
-                <span className="rw-review-date">{r.date}</span>
+        {/* Right: Bar chart */}
+        <div className="grw-bars-col">
+          {RATING_DIST.map(({ star, pct }) => (
+            <div key={star} className="grw-bar-row">
+              <span className="grw-bar-label">{star}</span>
+              <div className="grw-bar-track">
+                <div
+                  className="grw-bar-fill"
+                  style={{ width: vis ? `${pct}%` : "0%" }}
+                />
               </div>
-              {r.review && <p className="rw-review-text">{r.review}</p>}
             </div>
           ))}
         </div>
-      )}
+      </div>
+
+      {/* ── REVIEW CARDS ── */}
+      <div className="grw-cards">
+        {GOOGLE_REVIEWS.map((r, i) => {
+          const isLong = r.text.length > 90;
+          const expanded = expandedCards[i];
+          return (
+            <div
+              key={i}
+              className="grw-card"
+              style={{
+                opacity: vis ? 1 : 0,
+                transform: vis ? "translateY(0)" : "translateY(14px)",
+                transition: `opacity 0.45s ease ${0.1 + i * 0.08}s, transform 0.45s ease ${0.1 + i * 0.08}s`,
+              }}
+            >
+              {/* Card top: avatar + meta + google icon */}
+              <div className="grw-card-top">
+                <div className="grw-avatar" style={{ background: r.avatarColor }}>
+                  {r.initials}
+                </div>
+                <div className="grw-card-meta">
+                  <div className="grw-card-name">{r.name}</div>
+                  <div className="grw-card-time">{r.time}</div>
+                </div>
+                <GoogleIcon size={16} />
+              </div>
+
+              {/* Stars */}
+              <div className="grw-card-stars">
+                {[1,2,3,4,5].map(s => (
+                  <svg key={s} width="12" height="12" viewBox="0 0 24 24">
+                    <polygon
+                      points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                      fill={s <= r.rating ? "#FBBC05" : "#e0e0e0"}
+                      stroke={s <= r.rating ? "#FBBC05" : "#e0e0e0"}
+                      strokeWidth="1"
+                    />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Text */}
+              <p className="grw-card-text">
+                {isLong && !expanded ? r.text.slice(0, 88) + "…" : r.text}
+                {isLong && (
+                  <button
+                    className="grw-more-btn"
+                    onClick={() => setExpandedCards(prev => ({ ...prev, [i]: !prev[i] }))}
+                  >
+                    {expanded ? " Less" : " More"}
+                  </button>
+                )}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── CTA ACTIONS ── */}
+      <div className="grw-actions">
+        <a
+          href="https://g.page/Nithya+Ayurveda/review"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="grw-btn-primary"
+        >
+          <GoogleIcon size={15} />
+          Read More Reviews
+        </a>
+        <a
+          href="https://g.page/Nithya+Ayurveda/review"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="grw-btn-outline"
+        >
+          Write a Review
+        </a>
+      </div>
+
     </div>
   );
 }
@@ -318,14 +382,12 @@ const productsStyles = `
     overflow: hidden;
     opacity: 0; transform: translateY(18px);
     transition: opacity .55s ease, transform .55s ease, box-shadow .3s ease, border-color .3s ease;
-    /* overflow guard */
     min-width: 0;
     max-width: 100%;
   }
   .pc-card-outer.pc-vis { opacity: 1; transform: translateY(0); }
   .pc-card-outer:hover { box-shadow: var(--sh-md); border-color: var(--border); }
 
-  /* TWO-COLUMN GRID */
   .pc-card {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -348,7 +410,6 @@ const productsStyles = `
     min-width: 0;
   }
 
-  /* ── BIGGER IMAGE WRAP ── */
   .pc-img-wrap {
     position: relative;
     width: 256px;
@@ -393,7 +454,6 @@ const productsStyles = `
 
   .pc-emoji { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 68px; }
 
-  /* Standard USP badge */
   .pc-img-badge {
     background: var(--gd); color: #fff;
     font-size: 0.54rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
@@ -403,7 +463,6 @@ const productsStyles = `
   }
   .pc-img-badge span { color: var(--gsl); }
 
-  /* Hemp special bombarded USP badge */
   .pc-img-badge.usp-hemp {
     background: linear-gradient(135deg, #0f2418 0%, #1f4d2e 100%);
     border: 1.5px solid rgba(107,191,89,0.45);
@@ -467,7 +526,6 @@ const productsStyles = `
     word-break: break-word; overflow-wrap: break-word;
   }
 
-  /* Hemp bombarded feature badges */
   .pc-hemp-usp-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
   .pc-hemp-badge {
     display: inline-flex; align-items: center; gap: 5px;
@@ -479,7 +537,6 @@ const productsStyles = `
   }
   .pc-hemp-badge::before { content: '🌿'; font-size: 0.65rem; }
 
-  /* USP highlight block */
   .pc-usp-highlight {
     background: linear-gradient(135deg, var(--gd) 0%, var(--gf) 100%);
     border-radius: 8px; padding: 10px 14px;
@@ -495,7 +552,6 @@ const productsStyles = `
     word-break: break-word; overflow-wrap: break-word;
   }
 
-  /* Hemp USP highlight */
   .pc-usp-highlight.usp-hemp-hl {
     background: linear-gradient(135deg, #0c1f12 0%, #1a4228 50%, #2a6040 100%);
     border: 1.5px solid rgba(107,191,89,0.32);
@@ -591,71 +647,255 @@ const productsStyles = `
   .pc-add-btn.added { background: var(--gm); }
   .pc-add-btn svg { width: 13px; height: 13px; }
 
-  /* ── RATING WIDGET ── */
-  .rw-wrap {
-    background: var(--off); border: 1px solid var(--borderc);
-    border-radius: 9px; padding: 13px 16px; margin-top: 2px;
+  /* ══════════════════════════════════════════
+     GOOGLE REVIEW WIDGET
+  ══════════════════════════════════════════ */
+
+  .grw-wrap {
+    margin-top: 12px;
+    border: 1px solid #e8eaed;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   }
-  .rw-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .rw-title-block { display: flex; flex-direction: column; gap: 5px; }
-  .rw-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gm); }
-  .rw-avg-row { display: flex; align-items: center; gap: 7px; }
-  .rw-avg-num { font-family: 'Nunito Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--gd); line-height: 1; }
-  .rw-total { font-size: 0.6rem; font-weight: 400; color: var(--tmuted); display: block; margin-top: 2px; }
-  .rw-rate-btn {
+
+  .grw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e8eaed;
+  }
+  .grw-header-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .grw-header-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3c4043;
+    letter-spacing: 0.02em;
+  }
+  .grw-header-badge {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #34A853;
+    background: #e6f4ea;
+    border: 1px solid #a8d5b5;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  .grw-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 14px;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .grw-score-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+  .grw-big-num {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #202124;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .grw-stars-row {
+    display: flex;
+    gap: 1px;
+  }
+  .grw-score-sub {
+    font-size: 0.62rem;
+    color: #70757a;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .grw-bars-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+  .grw-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .grw-bar-label {
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: #70757a;
+    min-width: 14px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .grw-bar-track {
+    flex: 1;
+    height: 7px;
+    background: #e8eaed;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .grw-bar-fill {
+    height: 100%;
+    background: #FBBC05;
+    border-radius: 100px;
+    transition: width 1s cubic-bezier(.22,1,.36,1);
+  }
+
+  .grw-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .grw-card {
+    padding: 14px 14px;
+    border-bottom: 1px solid #f1f3f4;
+    transition: background 0.2s ease;
+  }
+  .grw-card:last-child { border-bottom: none; }
+  .grw-card:hover { background: #fafafa; }
+
+  .grw-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .grw-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .grw-card-meta {
+    flex: 1;
+    min-width: 0;
+  }
+  .grw-card-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #202124;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .grw-card-time {
+    font-size: 0.65rem;
+    color: #70757a;
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .grw-card-stars {
+    display: flex;
+    gap: 1px;
+    margin-bottom: 7px;
+  }
+
+  .grw-card-text {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: #3c4043;
+    line-height: 1.65;
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .grw-more-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #1a73e8;
+    font-family: inherit;
+  }
+  .grw-more-btn:hover { text-decoration: underline; }
+
+  .grw-actions {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #f8f9fa;
+    border-top: 1px solid #e8eaed;
+    flex-wrap: wrap;
+  }
+
+  .grw-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-family: 'Nunito Sans', sans-serif;
-    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--gm); background: var(--white); border: 1.5px solid var(--border);
-    padding: 5px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap;
-    transition: all .22s; flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: var(--gd);
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 100px;
+    transition: background 0.22s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(31,61,43,0.20);
+    white-space: nowrap;
   }
-  .rw-rate-btn:hover { background: var(--gd); border-color: var(--gd); color: #fff; }
-  .rw-your-rating { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-  .rw-yr-label { font-size: 0.56rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gm); }
-  .rw-dist { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
-  .rw-dist-row { display: flex; align-items: center; gap: 6px; }
-  .rw-dist-star { font-size: 0.6rem; font-weight: 600; color: var(--gs); width: 16px; text-align: right; flex-shrink: 0; }
-  .rw-dist-bar-bg { flex: 1; height: 3px; background: rgba(107,191,89,0.12); border-radius: 100px; overflow: hidden; }
-  .rw-dist-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gsl), var(--gs)); border-radius: 100px; transition: width .5s ease; }
-  .rw-dist-count { font-size: 0.6rem; font-weight: 400; color: var(--tmuted); width: 13px; text-align: right; flex-shrink: 0; }
-  .rw-form {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px; margin-top: 7px;
+  .grw-btn-primary:hover {
+    background: var(--gf);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(31,61,43,0.28);
   }
-  .rw-form-title { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 500; color: var(--gd); margin-bottom: 8px; font-style: italic; }
-  .rw-star-picker { display: flex; align-items: center; gap: 3px; margin-bottom: 8px; flex-wrap: wrap; }
-  .rw-sp-btn { font-size: 20px; background: none; border: none; cursor: pointer; color: rgba(107,191,89,0.25); transition: color .15s, transform .15s; padding: 0; line-height: 1; }
-  .rw-sp-btn.active { color: var(--gs); transform: scale(1.15); }
-  .rw-star-label { font-size: 0.68rem; font-weight: 600; color: var(--gs); margin-left: 4px; }
-  .rw-textarea {
-    width: 100%; background: var(--off); border: 1px solid var(--borderc);
-    border-radius: 6px; padding: 8px 10px;
-    font-family: 'Nunito Sans', sans-serif; font-size: 0.78rem; font-weight: 400; color: var(--text);
-    resize: none; outline: none; transition: border-color .22s; margin-bottom: 8px; line-height: 1.6;
-  }
-  .rw-textarea:focus { border-color: var(--gs); }
-  .rw-textarea::placeholder { color: var(--tmuted); }
-  .rw-form-actions { display: flex; gap: 7px; justify-content: flex-end; flex-wrap: wrap; }
-  .rw-cancel-btn {
+
+  .grw-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-family: 'Nunito Sans', sans-serif;
-    font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--tmuted); background: transparent; border: 1px solid var(--borderc);
-    padding: 6px 13px; border-radius: 100px; cursor: pointer; transition: all .22s;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--gd);
+    background: transparent;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--gd);
+    transition: background 0.22s ease, color 0.22s ease;
+    white-space: nowrap;
   }
-  .rw-cancel-btn:hover { border-color: var(--tmuted); color: var(--text); }
-  .rw-submit-btn {
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    color: #fff; background: rgba(31,61,43,0.28); border: none;
-    padding: 6px 16px; border-radius: 100px; cursor: pointer; transition: all .22s; opacity: .5;
+  .grw-btn-outline:hover {
+    background: var(--gd);
+    color: #fff;
   }
-  .rw-submit-btn.active { background: var(--gd); opacity: 1; }
-  .rw-submit-btn.active:hover { background: var(--gf); }
-  .rw-reviews { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; border-top: 1px solid var(--borderc); padding-top: 8px; }
-  .rw-review-card { background: var(--white); border-radius: 6px; padding: 8px 10px; border: 1px solid var(--borderc); }
-  .rw-review-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; flex-wrap: wrap; gap: 4px; }
-  .rw-review-date { font-size: 0.56rem; font-weight: 400; color: var(--tmuted); }
-  .rw-review-text { font-size: 0.72rem; font-weight: 400; color: var(--tbody); line-height: 1.55; margin: 0; word-break: break-word; overflow-wrap: break-word; }
+
+  .pc-google-review { display: none; }
 
   .prd-empty { text-align: center; padding: 56px 0; font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--tmuted); }
 
@@ -691,7 +931,7 @@ const productsStyles = `
   .prd-banner-btn:hover { box-shadow: 0 7px 24px rgba(0,0,0,0.18); transform: translateY(-2px); }
 
   /* ══════════════════════════════════════════
-     RESPONSIVE — MOBILE FIRST FIX
+     RESPONSIVE — MOBILE FIRST
   ══════════════════════════════════════════ */
 
   @media (max-width: 1060px) {
@@ -709,15 +949,12 @@ const productsStyles = `
     .pc-content { padding: 18px 16px; gap: 8px; }
   }
 
-  /* Stack card at 640px — well before typical 360px mobile */
   @media (max-width: 640px) {
     .prd-inner { padding: 0 12px 48px; }
     .prd-list { gap: 14px; }
 
-    /* Single column */
     .pc-card { grid-template-columns: 1fr; }
 
-    /* Image panel — compact horizontal strip */
     .pc-img-panel {
       border-right: none;
       border-bottom: 1px solid var(--borderc);
@@ -737,36 +974,34 @@ const productsStyles = `
     }
     .pc-num { display: none; }
 
-    /* Content */
     .pc-content { padding: 16px 14px; gap: 8px; }
     .pc-name { font-size: 17px; }
     .pc-tagline { font-size: 0.72rem; }
     .pc-desc { font-size: 0.74rem; }
 
-    /* Hemp badges */
     .pc-hemp-usp-strip { gap: 5px; }
     .pc-hemp-badge { font-size: 0.5rem; padding: 3px 8px; }
 
-    /* USP highlight */
     .pc-usp-highlight { padding: 10px 12px; }
     .pc-usp-hl-text { font-size: 0.82rem; }
 
-    /* Footer — stack vertically */
     .pc-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
     .pc-btn-group { width: 100%; }
     .pc-add-btn { width: 100%; justify-content: center; padding: 12px 18px; }
     .pc-price { font-size: 22px; }
 
-    /* Banner */
     .prd-banner { flex-direction: column; padding: 28px 20px; text-align: center; border-radius: 14px; gap: 18px; }
     .prd-banner-btn { width: 100%; }
 
-    /* Hero */
     .prd-hero { padding: 32px 0 20px; }
     .filter-tab { padding: 6px 14px; font-size: 0.63rem; }
 
-    /* Rating widget */
-    .rw-wrap { padding: 10px 12px; }
+    .grw-summary { gap: 12px; padding: 14px 12px; }
+    .grw-big-num { font-size: 2rem; }
+    .grw-score-col { min-width: 60px; }
+    .grw-card { padding: 12px; }
+    .grw-actions { flex-direction: column; gap: 8px; }
+    .grw-btn-primary, .grw-btn-outline { width: 100%; justify-content: center; text-align: center; }
   }
 
   @media (max-width: 400px) {
@@ -780,6 +1015,7 @@ const productsStyles = `
     .filter-tab { padding: 5px 10px; font-size: 0.58rem; }
     .pc-price { font-size: 20px; }
     .pc-hemp-badge { font-size: 0.46rem; padding: 3px 7px; }
+    .grw-big-num { font-size: 1.8rem; }
   }
 `;
 
@@ -832,7 +1068,9 @@ function ProductItem({ product, index, addToCart }) {
   const isHemp = product.icon === "spray";
 
   return (
+    // FIX 3: id uses numeric product.id — matches footer's `product-${id}` pattern
     <div
+      id={`product-${product.id}`}
       ref={ref}
       className={`pc-card-outer${visible ? " pc-vis" : ""}`}
       style={{ transitionDelay: `${Math.min(index * 0.06, 0.18)}s` }}
@@ -897,7 +1135,6 @@ function ProductItem({ product, index, addToCart }) {
 
           <p className="pc-desc">{product.description}</p>
 
-          {/* Hemp: bombard Cannabis Sativa USP with feature badges */}
           {isHemp && (
             <div className="pc-hemp-usp-strip">
               <span className="pc-hemp-badge">Anti-Inflammatory</span>
@@ -961,7 +1198,7 @@ function ProductItem({ product, index, addToCart }) {
             </div>
           </div>
 
-          <RatingWidget productId={product.id} />
+          <GoogleReviewWidget />
 
         </div>
       </div>
@@ -972,12 +1209,25 @@ function ProductItem({ product, index, addToCart }) {
 /* ── MAIN EXPORT ── */
 export default function Products() {
   const { addToCart } = useOutletContext();
+  const location = useLocation();
   const heroRef = useRef();
   const heroVisible = useInView(heroRef, 0.1);
   const [activeTab, setActiveTab] = useState("All");
 
   const filtered = activeTab === "All" ? products : products.filter(p => p.category === activeTab);
   const phone = "918956658209";
+
+  // FIX 4: Scroll to product after navigation from footer using location.state
+  useEffect(() => {
+    if (location.state?.scrollTo) {
+      // Ensure "All" tab is active so the target card is rendered
+      setActiveTab("All");
+      setTimeout(() => {
+        const el = document.getElementById(location.state.scrollTo);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [location.state]);
 
   return (
     <>

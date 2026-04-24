@@ -278,7 +278,7 @@ export default function AboutHome() {
               <div className="ah-img-blob"></div>
               <img src={aboutImg} alt="Ayurvedic Wellness" className="ah-main-img" />
               <div className="ah-experience-badge">
-                <span className="ah-exp-val">25+</span>
+                <span className="ah-exp-val">6+</span>
                 <span className="ah-exp-lab">Years of Healing</span>
               </div>
             </div>
@@ -314,13 +314,7 @@ export default function AboutHome() {
               ))}
             </div>
 
-            <a href="/about" className="ah-primary-btn">
-              Explore Our Story
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </a>
+            
           </div>
         </div>
       </section>
