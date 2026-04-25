@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import FeaturedProducts from "./FeaturedProducts"; // adjust path if needed
+import FeaturedProducts from "./FeaturedProducts";
 
 import mv1 from "../assets/images/mv1.jpg";
 import mv2 from "../assets/images/mv2.jpg";
 import mv3 from "../assets/images/mv3.jpg";
 import mv4 from "../assets/images/mv4.jpg";
+import product1 from "../assets/images/product1.jpg";
+import product2 from "../assets/images/product2.jpg";
+import product3 from "../assets/images/product3.jpg";
+import product4 from "../assets/images/product4.jpg";
 
 const PRODUCTS = [
   {
@@ -13,7 +17,7 @@ const PRODUCTS = [
     name: "Hemp Pain Spray",
     tagline: "Fast-acting relief for back, joints & muscles",
     desc: "Cold-pressed hemp extract blended with Ashwagandha and Shallaki — a time-tested Ayurvedic formula for deep, lasting comfort.",
-    img: "/src/assets/products/hemp.png",
+    img: product2,
     badge: "Best Seller",
     category: "Pain Relief",
     herbs: ["Ashwagandha", "Shallaki", "Hemp"],
@@ -24,7 +28,7 @@ const PRODUCTS = [
     name: "OvuCare",
     tagline: "Hormonal balance & PCOS / PCOD support",
     desc: "A gentle Ayurvedic blend of Shatavari, Lodhra and Ashoka that helps support a healthy hormonal rhythm — naturally and holistically.",
-    img: "/src/assets/products/ovucare.png",
+    img: product3,
     badge: "For Her",
     category: "Women's Wellness",
     herbs: ["Shatavari", "Lodhra", "Ashoka"],
@@ -35,7 +39,7 @@ const PRODUCTS = [
     name: "Vajra-X",
     tagline: "Stamina, vitality & performance support",
     desc: "Rooted in classical Vajikarana therapy, Vajra-X harnesses Shilajit, Safed Musli and Ashwagandha to help support energy and vitality.",
-    img: "/src/assets/products/vajra.png",
+    img: product4,
     badge: "For Him",
     category: "Men's Vitality",
     herbs: ["Shilajit", "Safed Musli", "Ashwagandha"],
@@ -46,7 +50,7 @@ const PRODUCTS = [
     name: "Kufrida",
     tagline: "Respiratory health & cough & cold support",
     desc: "A classical respiratory formulation with Tulsi, Vasa and Kantakari — helping the airways stay clear and the breath stay deep.",
-    img: "/src/assets/products/kufrida.png",
+    img: product1,
     badge: "Respiratory",
     category: "Respiratory Care",
     herbs: ["Tulsi", "Vasa", "Kantakari"],
@@ -201,7 +205,6 @@ export default function NithyaHome() {
           overflow: hidden;
         }
 
-        /* Desktop image — centered */
         .hero-product-image {
           width: 100%; height: 100%;
           object-fit: cover;
@@ -369,12 +372,8 @@ export default function NithyaHome() {
         .why-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #2D5344; margin-bottom: 12px; }
         .why-body  { font-family: 'Lato', sans-serif; color: #5A5346; line-height: 1.6; font-size: 0.9rem; }
 
-        /* ════════════════════════════════════════
-           MOBILE ONLY — desktop is untouched above
-           ════════════════════════════════════════ */
         @media (max-width: 768px) {
 
-          /* Full-height hero on mobile */
           .hero-section {
             height: 100vh;
             overflow: hidden;
@@ -382,7 +381,6 @@ export default function NithyaHome() {
             padding-top: 0 !important;
           }
 
-          /* ── KEY FIX: pin image to very top so product shows in upper half ── */
           .hero-product-image {
             position: absolute;
             top: 0;
@@ -390,12 +388,11 @@ export default function NithyaHome() {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: 50% 0% !important; /* pin to top */
+            object-position: 50% 0% !important;
           }
 
           .hero-img-layer { position: absolute; inset: 0; }
 
-          /* Dim overlay so bottom text is always readable */
           .hero-img-layer::after {
             content: "";
             position: absolute;
@@ -404,7 +401,6 @@ export default function NithyaHome() {
             z-index: 1;
           }
 
-          /* Strong gradient — clear from halfway down */
           .hero-overlay {
             background: linear-gradient(
               to bottom,
@@ -413,7 +409,6 @@ export default function NithyaHome() {
             );
           }
 
-          /* Text block sits in the bottom 40% of the screen */
           .hero-content {
             top: auto;
             left: 16px;
@@ -422,7 +417,6 @@ export default function NithyaHome() {
             width: auto;
           }
 
-          /* ── SMALLER FONTS on mobile ── */
           .hero-badge {
             font-size: 0.55rem;
             padding: 4px 10px;
@@ -455,7 +449,6 @@ export default function NithyaHome() {
       <section className="hero-section">
         <div className="hero-main">
 
-          {/* PREVIOUS IMAGE (EXITING) */}
           {prevProd && exitingImg && (
             <div className="hero-img-layer exiting">
               <img
@@ -467,7 +460,6 @@ export default function NithyaHome() {
             </div>
           )}
 
-          {/* ACTIVE IMAGE */}
           <div className="hero-img-layer active" key={active}>
             <img
               src={activeImg}
@@ -479,7 +471,6 @@ export default function NithyaHome() {
 
           <div className="hero-overlay" />
 
-          {/* CONTENT */}
           <div className="hero-content" key={`content-${active}`}>
             <span className="hero-badge">{p.badge}</span>
 
@@ -502,7 +493,6 @@ export default function NithyaHome() {
             </div>
           </div>
 
-          {/* CONTROLS */}
           <div className="hero-controls">
             <div className="progress-container">
               {PRODUCTS.map((_, i) => (
