@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // ✅ ADD
+import { useLocation } from "react-router-dom"; 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
@@ -8,14 +8,16 @@ import FloatingHelpWidget from "./components/FloatingHelpWidget";
 import { Outlet } from "react-router-dom";
 import Preloader from "./components/Preloader";
 
+// import CookieBanner from "./components/CookieBanner";
+// import CookieLeadPopup from "./components/CookieLeadPopup";
+
 export default function App() {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const location = useLocation(); // ✅ ADD
-
-  useEffect(() => { // ✅ ADD
+  const location = useLocation(); 
+  useEffect(() => { 
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
@@ -61,6 +63,8 @@ export default function App() {
         whatsappNumber="918956658209"
         phoneNumber="918956658209"
       />
+      {/* <CookieBanner />
+      <CookieLeadPopup /> */}
     </>
   );
 }

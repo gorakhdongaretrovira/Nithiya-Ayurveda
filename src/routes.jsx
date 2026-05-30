@@ -7,6 +7,7 @@ import Products from "./sections/Products";
 import Contact from "./sections/Contact";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const router = createHashRouter([
 {
@@ -39,6 +40,10 @@ element: <Contact />,
 path: "*",
 element: <NotFound />,
 },
+{
+  path: "/privacy-policy",
+  element: <PrivacyPolicy />,
+}
 ]);
 
 export default router;
