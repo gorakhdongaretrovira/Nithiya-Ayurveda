@@ -1,5 +1,3 @@
-import aboutImg from "../assets/images/about.jpg";
-
 export default function AboutHome() {
   return (
     <section style={{

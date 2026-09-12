@@ -478,8 +478,6 @@ export default function Footer() {
   const footerRef = useRef(null);
   const animRefs = useRef([]);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
   // FIX 2: Use navigate state instead of hash — reliable across page load
   const handleProductClick = (productId) => {
     const elementId = `product-${productId}`;
@@ -675,14 +673,14 @@ export default function Footer() {
               <p className="ft-crafted">
                 Designed by{" "}
                 <a
-                  href="https://www.troviracompany.com/"
+                  href="https://www.gdaisolutions.com/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="trovira-badge"
                 >
                   <span className="trovira-dot" />
                   <span className="trovira-text">
-                    The Trovira Company
+                    GD AI SOLUTIONS
                   </span>
                 </a>
               </p>

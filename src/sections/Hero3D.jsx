@@ -80,7 +80,6 @@ export default function NithyaHome() {
   const navigate = useNavigate();
   const [active, setActive] = useState(0);
   const [prevActive, setPrevActive] = useState(null);
-  const [direction, setDirection] = useState("next");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(null);
@@ -88,8 +87,7 @@ export default function NithyaHome() {
   const whyRef = useRef(null);
   const [whyVisible, setWhyVisible] = useState(false);
 
-  const [cart, setCart] = useState([]);
-  const [toast, setToast] = useState(null);
+  const [toast] = useState(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -99,21 +97,8 @@ export default function NithyaHome() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleAddToCart = useCallback((item) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
-      if (existing) {
-        return prev.map((c) => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-    setToast(item.name);
-    setTimeout(() => setToast(null), 2500);
-  }, []);
-
-  const goTo = useCallback((index, dir = "next") => {
+  const goTo = useCallback((index) => {
     if (isTransitioning || index === active) return;
-    setDirection(dir);
     setPrevActive(active);
     setIsTransitioning(true);
     setActive(index);

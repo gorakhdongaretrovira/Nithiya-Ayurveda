@@ -1,6 +1,3 @@
-import { useRef } from "react";
-import { motion } from "framer-motion";
-
 const teamMembers = [
   {
     initials: "SP",

@@ -1220,9 +1220,9 @@ export default function Products() {
   // FIX 4: Scroll to product after navigation from footer using location.state
   useEffect(() => {
     if (location.state?.scrollTo) {
-      // Ensure "All" tab is active so the target card is rendered
-      setActiveTab("All");
       setTimeout(() => {
+        // Ensure "All" tab is active so the target card is rendered
+        setActiveTab("All");
         const el = document.getElementById(location.state.scrollTo);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);

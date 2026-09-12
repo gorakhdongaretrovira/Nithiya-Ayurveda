@@ -605,9 +605,12 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [searchOpen,  setSearchOpen]  = useState(false);
   const [query,       setQuery]       = useState("");
-  const [results,     setResults]     = useState([]);
   const styleInjected = useRef(false);
   const searchRef     = useRef(null);
+
+  const results = query.trim()
+    ? products.filter(p => p.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 5)
+    : [];
 
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -640,26 +643,12 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  // Filter products when query changes
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    const q = query.trim().toLowerCase();
-    const matched = products
-      .filter(p => p.name.toLowerCase().includes(q))
-      .slice(0, 5);
-    setResults(matched);
-  }, [query]);
-
   // Close search dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSearchOpen(false);
         setQuery("");
-        setResults([]);
       }
     };
     if (searchOpen) {
@@ -672,7 +661,6 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
     setSearchOpen(prev => {
       if (prev) {
         setQuery("");
-        setResults([]);
       }
       return !prev;
     });
@@ -681,7 +669,6 @@ export default function Navbar({ cartCount = 0, setIsCartOpen }) {
   const handleProductSelect = (productId) => {
     setSearchOpen(false);
     setQuery("");
-    setResults([]);
     if (location.pathname !== "/products") {
       navigate("/products");
       // Wait for navigation + render, then scroll
